@@ -1,4 +1,4 @@
-name: name: Build RBN Music Studio Pro APK
+name: Build RBN Music Studio Pro APK
 
 'on':
   push:
@@ -23,14 +23,17 @@ jobs:
           java-version: '17'
           distribution: temurin
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
       - name: Build APK
-        run: |
-          gradle --version
-          gradle assembleDebug
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: RBN-Music-Studio-Pro-APK
           path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: 
+          if-no-files-found: error
