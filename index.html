@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>RBN Music Studio Pro</title>
+<style>
+:root{--bg:#10151d;--panel:#19222e;--panel2:#202d3a;--line:#344454;--mint:#65e6b3;--blue:#59a8ff;--text:#edf4fa;--muted:#93a5b6;--orange:#ffb454}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px Arial,sans-serif}
+header{height:52px;background:#0b1017;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:12px}
+.brand{font-weight:800;letter-spacing:1px;color:var(--mint);font-size:15px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:3px}
+button{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:8px 10px;font-weight:700}
+button.primary{background:var(--mint);color:#08130f;border-color:var(--mint)}button:active{opacity:.7}
+.toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.transport{height:54px;display:flex;align-items:center;justify-content:center;gap:9px;border-bottom:1px solid var(--line);background:#131b25}
+#clock{font:700 19px monospace;color:var(--mint);min-width:90px;text-align:center}
+main{padding:10px;display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.section-title{padding:10px 12px;border-bottom:1px solid var(--line);font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.timeline{overflow:auto;min-height:280px}.ruler{display:flex;min-width:650px;height:27px;background:#121a24;border-bottom:1px solid var(--line);color:var(--muted)}
+.ruler span{flex:1;border-left:1px solid var(--line);padding:6px 5px;font-size:10px}
+.track{display:grid;grid-template-columns:115px minmax(535px,1fr);min-width:650px;min-height:61px;border-bottom:1px solid #2a3947}
+.trackname{padding:8px;background:#1b2632;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+.trackname strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trackname small{color:var(--muted)}
+.lane{position:relative;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1px),#2a3947 calc(12.5% - 1px),#2a3947 12.5%)}
+.clip{position:absolute;top:9px;left:2%;width:35%;height:41px;border:1px solid #4dba9a;border-radius:4px;background:linear-gradient(135deg,#236f61,#1b514a);display:flex;align-items:center;padding:6px;overflow:hidden;color:#d9fff1;font-size:11px}
+.clip.blue{background:linear-gradient(135deg,#285e91,#203d62);border-color:#59a8ff;color:#e1f1ff}
+.clip.orange{background:linear-gradient(135deg,#93602d,#583d25);border-color:var(--orange);color:#fff0da}
+.empty{padding:25px;text-align:center;color:var(--muted);line-height:1.7}
+.side{display:flex;flex-direction:column;gap:10px}.meter{height:100px;display:flex;align-items:end;gap:4px;padding:12px;background:#111821}
+.meter i{display:block;flex:1;border-radius:3px 3px 0 0;background:linear-gradient(0deg,#54d7a6,#d4e967);height:var(--h)}
+.control{padding:10px 12px;border-bottom:1px solid var(--line)}.control:last-child{border-bottom:0}
+label{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:7px}input[type=range]{width:100%;accent-color:var(--mint)}
+.status{padding:9px 12px;color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:8px}
+#trackList{max-height:245px;overflow:auto}.trackrow{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}.trackrow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type=file]{display:none}.note{font-size:11px;color:var(--muted);line-height:1.5;padding:10px 12px}
+@media(max-width:700px){main{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side .section:first-child{grid-column:1/-1}.brand{font-size:12px}header{padding:0 8px}.toolbar button{padding:7px;font-size:11px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">RBN MUSIC STUDIO PRO<small>ARRANGE • RECORD • MIX</small></div>
+ <div class="toolbar">
+  <button id="newBtn">NEW</button><button id="saveBtn">SAVE</button>
+  <button id="loadBtn">OPEN</button><button class="primary" id="exportBtn">EXPORT NOTES</button>
+ </div>
+</header>
+<div class="transport">
+ <button id="playBtn" class="primary">▶ PLAY</button><button id="stopBtn">■ STOP</button>
+ <button id="recordBtn">● RECORD</button><div id="clock">00:00.0</div>
+</div>
+<main>
+ <section class="section">
+  <div class="section-title"><span>ARRANGEMENT / TIMELINE</span><div class="toolbar"><button id="addTrackBtn">+ TRACK</button><button id="importBtn">+ AUDIO</button><input id="audioFile" type="file" accept="audio/*" multiple></div></div>
+  <div class="timeline" id="timeline">
+   <div class="ruler"><span>BAR 1</span><span>BAR 2</span><span>BAR 3</span><span>BAR 4</span><span>BAR 5</span><span>BAR 6</span><span>BAR 7</span><span>BAR 8</span></div>
+   <div id="tracks">
+    <div class="track"><div class="trackname"><strong>Audio 01</strong><small>Ready</small></div><div class="lane"><div class="clip">Add your first audio file</div></div></div>
+    <div class="track"><div class="trackname"><strong>Vocal 01</strong><small>Mic input</small></div><div class="lane"><div class="clip blue" style="width:20%;left:40%">Vocal region</div></div></div>
+    <div class="track"><div class="trackname"><strong>Beat / MIDI</strong><small>Piano roll soon</small></div><div class="lane"><div class="clip orange" style="width:28%;left:5%">Beat region</div></div></div>
+   </div>
+  </div>
+  <div class="status"><span id="statusText">Ready • Import an audio file to begin</span><span>44.1 kHz concept</span></div>
+ </section>
+ <aside class="side">
+  <section class="section"><div class="section-title">MASTER</div><div class="meter"><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:52%"></i><i style="--h:75%"></i><i style="--h:63%"></i><i style="--h:88%"></i><i style="--h:70%"></i><i style="--h:48%"></i></div>
+   <div class="control"><label><span>Master volume</span><b id="masterVal">80%</b></label><input id="master" type="range" min="0" max="100" value="80"></div>
+   <div class="control"><label><span>Tempo (BPM)</span><b id="tempoVal">120</b></label><input id="tempo" type="range" min="60" max="180" value="120"></div>
+  </section>
+  <section class="section"><div class="section-title">TRACKS <span id="count">3</span></div><div id="trackList">
+   <div class="trackrow"><span>Audio 01</span><button class="mute">M</button></div><div class="trackrow"><span>Vocal 01</span><button class="mute">M</button></div><div class="trackrow"><span>Beat / MIDI</span><button class="mute">M</button></div>
+  </div><div class="note">This is the first interface prototype. Professional MIDI instruments, effects processing and full multitrack recording are planned for later versions.</div></section>
+ </aside>
+</main>
+<div id="pianoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:20;padding:12px;overflow:auto">
+ <section class="section" style="max-width:980px;margin:0 auto">
+  <div class="section-title"><span>PIANO ROLL • MIDI NOTE EDITOR</span><div class="toolbar"><button id="clearNotes">CLEAR</button><button id="playNotes" class="primary">▶ PREVIEW NOTES</button><button id="closePiano">CLOSE ✕</button></div></div>
+  <div style="padding:10px 12px;color:var(--muted);font-size:11px">Tap a cell to add/remove a note. This prototype previews notes with simple synthesized tones; MIDI export and full instrument plugins are not implemented yet.</div>
+  <div style="overflow:auto;padding:0 10px 12px"><div id="pianoGrid" style="min-width:620px"></div></div>
+  <div class="control"><label><span>Note length</span><b id="noteLenText">1 beat</b></label><input id="noteLen" type="range" min="1" max="4" value="1"></div>
+ </section>
+</div>
+<audio id="player" controls style="position:absolute;left:-9999px"></audio>
+<script>
+const $=id=>document.getElementById(id);
+let tracks=3, playing=false, start=0, elapsed=0, timer=null, audioUrl=null, audioName="", recording=false, mediaRecorder=null, chunks=[];
+function status(t){$('statusText').textContent=t}
+function tick(){let s=elapsed+(playing?(Date.now()-start)/1000:0);$('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0')+'.'+Math.floor((s%1)*10)}
+$('playBtn').onclick=()=>{if(audioUrl){$('player').play().catch(()=>{});} if(!playing){playing=true;start=Date.now();timer=setInterval(tick,100);$('playBtn').textContent='Ⅱ PAUSE';status('Playback running');}else{playing=false;elapsed+=(Date.now()-start)/1000;clearInterval(timer);if(audioUrl)$('player').pause();$('playBtn').textContent='▶ PLAY';tick();status('Playback paused');}};
+$('stopBtn').onclick=()=>{playing=false;elapsed=0;clearInterval(timer);if(audioUrl){$('player').pause();$('player').currentTime=0;} $('playBtn').textContent='▶ PLAY';tick();status('Stopped');};
+$('importBtn').onclick=()=>$('audioFile').click();
+$('audioFile').onchange=e=>{const files=[...e.target.files];if(!files.length)return;const f=files[0];audioUrl=URL.createObjectURL(f);audioName=f.name;$('player').src=audioUrl;const row=document.createElement('div');row.className='track';row.innerHTML='<div class="trackname"><strong></strong><small>Imported audio</small></div><div class="lane"><div class="clip"></div></div>';row.querySelector('strong').textContent=f.name;row.querySelector('.clip').textContent=f.name;row.querySelector('.clip').style.width='65%';$('tracks').appendChild(row);tracks++;$('count').textContent=tracks;const tr=document.createElement('div');tr.className='trackrow';const sp=document.createElement('span');sp.textContent=f.name;const b=document.createElement('button');b.className='mute';b.textContent='M';b.onclick=()=>{b.classList.toggle('primary');sp.style.opacity=b.classList.contains('primary')?'.45':'1'};tr.append(sp,b);$('trackList').appendChild(tr);status('Loaded '+f.name+' • press PLAY');};
+$('addTrackBtn').onclick=()=>{tracks++;const name='Audio '+String(tracks).padStart(2,'0');const row=document.createElement('div');row.className='track';row.innerHTML='<div class="trackname"><strong></strong><small>Empty track</small></div><div class="lane"></div>';row.querySelector('strong').textContent=name;$('tracks').appendChild(row);const tr=document.createElement('div');tr.className='trackrow';tr.innerHTML='<span></span><button class="mute">M</button>';tr.querySelector('span').textContent=name;tr.querySelector('button').onclick=e=>e.currentTarget.classList.toggle('primary');$('trackList').appendChild(tr);$('count').textContent=tracks;status(name+' added');};
+$('master').oninput=e=>{$('masterVal').textContent=e.target.value+'%';$('player').volume=e.target.value/100;};
+$('tempo').oninput=e=>$('tempoVal').textContent=e.target.value;
+$('recordBtn').onclick=async()=>{if(recording){mediaRecorder.stop();recording=false;$('recordBtn').textContent='● RECORD';status('Recording stopped');return;}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mediaRecorder.onstop=()=>{const blob=new Blob(chunks,{type:'audio/webm'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='RBN-recording.webm';a.click();stream.getTracks().forEach(t=>t.stop());status('Recording saved to Downloads as WebM');};mediaRecorder.start();recording=true;$('recordBtn').textContent='■ STOP REC';status('Microphone recording...');}catch(err){status('Microphone permission unavailable in this environment');}};
+$('saveBtn').onclick=()=>{const data={tempo:$('tempo').value,master:$('master').value,trackCount:tracks,audioName};localStorage.setItem('rbnProject',JSON.stringify(data));status('Project settings saved on this device');};
+$('loadBtn').onclick=()=>{try{const d=JSON.parse(localStorage.getItem('rbnProject'));if(!d){status('No saved project yet');return;}$('tempo').value=d.tempo;$('tempoVal').textContent=d.tempo;$('master').value=d.master;$('masterVal').textContent=d.master+'%';$('player').volume=d.master/100;status('Project settings restored • audio may need re-importing');}catch(e){status('Could not open saved project');}};
+$('newBtn').onclick=()=>{if(confirm('Start a new session? Current imported audio layout will reset.'))location.reload();};
+$('exportBtn').onclick=()=>{const data={app:'RBN Music Studio Pro',tempo:Number($('tempo').value),masterVolume:Number($('master').value),tracks:tracks,audioFile:audioName,note:'Prototype session settings only; not a mixed audio export.'};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='RBN-session-notes.json';a.click();status('Exported session notes (not a mixed song)');};
+document.querySelectorAll('.mute').forEach(b=>b.onclick=()=>b.classList.toggle('primary'));
+
+// Touch-friendly piano roll prototype
+const pianoModal=$('pianoModal'), pianoGrid=$('pianoGrid');
+const noteNames=['C5','B4','A#4','A4','G#4','G4','F#4','F4','E4','D#4','D4','C#4','C4','B3','A#3','A3','G#3','G3','F#3','F3','E3','D#3','D3','C#3','C3'];
+const noteFreq={'C3':130.81,'C#3':138.59,'D3':146.83,'D#3':155.56,'E3':164.81,'F3':174.61,'F#3':185,'G3':196,'G#3':207.65,'A3':220,'A#3':233.08,'B3':246.94,'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':370,'G4':392,'G#4':415.3,'A4':440,'A#4':466.16,'B4':493.88,'C5':523.25};
+let notes=new Set(), audioCtx=null;
+function buildPiano(){
+ pianoGrid.innerHTML='';
+ const head=document.createElement('div');head.style.cssText='display:grid;grid-template-columns:58px repeat(16,minmax(30px,1fr));height:25px;color:var(--muted);font-size:10px';
+ const blank=document.createElement('div');blank.textContent='NOTE';head.appendChild(blank);
+ for(let i=0;i<16;i++){const c=document.createElement('div');c.textContent=String(i+1);c.style.cssText='text-align:center;border-left:1px solid var(--line);padding-top:6px';head.appendChild(c)}pianoGrid.appendChild(head);
+ noteNames.forEach((n,ri)=>{
+  const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:58px repeat(16,minmax(30px,1fr));height:28px';
+  const label=document.createElement('div');label.textContent=n;label.style.cssText='padding:7px 5px;background:'+(n.includes('#')?'#202a35':'#e4edf2')+';color:'+(n.includes('#')?'#dce6ee':'#18232d')+';font-size:10px;font-weight:bold';row.appendChild(label);
+  for(let col=0;col<16;col++){const cell=document.createElement('button');cell.style.cssText='border-radius:0;padding:0;min-width:0;border:1px solid #344454;background:'+(col%4===0?'#253543':'#19222e')+';height:28px';
+   const key=ri+'-'+col; if(notes.has(key)){cell.style.background='var(--mint)';cell.style.borderColor='#b6ffe2'}
+   cell.setAttribute('aria-label',n+' step '+(col+1));
+   cell.onclick=()=>{if(notes.has(key))notes.delete(key);else notes.add(key);buildPiano();tone(noteFreq[n]||440,.12)};
+   row.appendChild(cell)
+  }pianoGrid.appendChild(row)
+ })
+}
+function tone(freq,dur){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.12,audioCtx.currentTime+.015);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur+.03)}catch(e){status('Tone preview is unavailable')}}
+$('pianoBtn').onclick=()=>{pianoModal.style.display='block';buildPiano()};
+$('closePiano').onclick=()=>pianoModal.style.display='none';
+$('clearNotes').onclick=()=>{notes.clear();buildPiano();status('Piano roll cleared')};
+$('noteLen').oninput=e=>$('noteLenText').textContent=e.target.value+' beat'+(e.target.value==='1'?'':'s');
+$('playNotes').onclick=()=>{if(!notes.size){status('Add notes by tapping the piano grid');return}const ordered=[...notes].sort((a,b)=>{const [ar,ac]=a.split('-').map(Number),[br,bc]=b.split('-').map(Number);return ac-bc||ar-br});const len=Number($('noteLen').value);let i=0;const beat=60000/Number($('tempo').value);function step(){if(i>=ordered.length){status('Piano roll preview finished');return}const [r,c]=ordered[i].split('-').map(Number);const note=noteNames[r];tone(noteFreq[note]||440,Math.max(.09,beat*len/1000*.8));i++;setTimeout(step,beat*len)}step();status('Previewing piano roll notes')};
+tick();
+</script>
+</body>
+</html>
